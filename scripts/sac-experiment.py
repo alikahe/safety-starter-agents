@@ -6,20 +6,19 @@ from safe_rl.utils.run_utils import setup_logger_kwargs
 from safe_rl.utils.mpi_tools import mpi_fork
 
 
-def main(robot, task, algo, seed, exp_name, cpu):
+def main(robot, task, seed, exp_name, cpu):
 
     # Verify experiment
     robot_list = ['point', 'car', 'doggo']
-    task_list = ['goal1', 'goal2', 'goal3', 'button1', 'button2', 'push1', 'push2']
-    algo_list = ['ppo', 'ppo_lagrangian', 'trpo', 'trpo_lagrangian', 'cpo', 'sac']
+    task_list = ['goal1', 'goal2', 'button1', 'button2', 'push1', 'push2']
 
-    algo = algo.lower()
     task = task.capitalize()
     robot = robot.capitalize()
-    assert algo in algo_list, "Invalid algo"
     assert task.lower() in task_list, "Invalid task"
     assert robot.lower() in robot_list, "Invalid robot"
 
+    algo = 'sac'
+    
     # Hyperparameters
     exp_name = algo + '_' + robot + task
     if robot=='Doggo':
@@ -30,7 +29,7 @@ def main(robot, task, algo, seed, exp_name, cpu):
         steps_per_epoch = 30000
     epochs = int(num_steps / steps_per_epoch)
     save_freq = 50
-    target_kl = 0.01
+    entropy_constraint = -1.
     cost_lim = 25
 
     # Fork for parallelizing
@@ -51,7 +50,7 @@ def main(robot, task, algo, seed, exp_name, cpu):
          epochs=epochs,
          steps_per_epoch=steps_per_epoch,
          save_freq=save_freq,
-         target_kl=target_kl,
+         entropy_constraint=entropy_constraint,
          cost_lim=cost_lim,
          seed=seed,
          logger_kwargs=logger_kwargs
